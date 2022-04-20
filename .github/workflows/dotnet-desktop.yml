@@ -43,7 +43,7 @@ jobs:
         Configuration: ${{ matrix.configuration }}
         
     - name: Pack app
-      run: dotnet publish --no-restore -o output --self-contained false -p:PublishSingleFile
+      run: dotnet publish --no-restore -o output --self-contained false
       env:
         Configuration: ${{ matrix.configuration }}
         
