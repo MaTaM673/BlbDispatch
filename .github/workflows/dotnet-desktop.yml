@@ -14,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        configuration: [Debug, Release]
+        configuration: [Release]
 
     runs-on: windows-latest  # For a list of available runner types, refer to
                              # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
@@ -43,6 +43,12 @@ jobs:
         Configuration: ${{ matrix.configuration }}
         
     - name: Pack app
-      run: dotnet pack
+      run: dotnet publish --no-restore -o output --self-contained false -p:PublishSingleFile
       env:
         Configuration: ${{ matrix.configuration }}
+        
+    - name: Publish artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: app
+        path: output
