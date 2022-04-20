@@ -41,3 +41,8 @@ jobs:
       run: dotnet build
       env:
         Configuration: ${{ matrix.configuration }}
+        
+    - name: Pack app
+      run: dotnet pack
+      env:
+        Configuration: ${{ matrix.configuration }}
