@@ -25,13 +25,22 @@
 
   <ItemGroup>
     <Resource Include="Resources\Images\CarTokenTr.png" />
-    <Resource Include="Resources\Images\newMap.png" />
-    <Resource Include="Resources\Data\Postals.csv" />
-    <Resource Include="Resources\Data\Roster.csv" />
   </ItemGroup>
 
   <ItemGroup>
     <None Update="appSettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Data\Postals.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Data\Roster.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Images\newMap.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Images\newMap2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

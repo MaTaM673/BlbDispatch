@@ -1,6 +1,7 @@
-﻿using Dispatch.WPF.Annotations;
-using Dispatch.WPF.Helpers;
+﻿using Dispatch.WPF.Helpers;
 using Dispatch.WPF.Models;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,8 +13,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
+using System.Windows.Media.Imaging;
 using Point = System.Drawing.Point;
 
 namespace Dispatch.WPF.ViewModels;
@@ -73,6 +73,7 @@ internal class MainWindowViewModel : INotifyPropertyChanged
     }
 
     private string? _newUnitPosition;
+
     public string? NewUnitPosition
     {
         get => _newUnitPosition;
@@ -84,12 +85,23 @@ internal class MainWindowViewModel : INotifyPropertyChanged
         }
     }
 
+
+    private ImageSource? _mapImage;
+    public ImageSource? MapImage
+    {
+        get => _mapImage;
+        set
+        {
+            if (Equals(value, _mapImage)) return;
+            _mapImage = value;
+            OnPropertyChanged();
+        }
+    }
+
     public MainWindowViewModel()
     {
         // Load roster
-        var uri = new Uri("pack://application:,,,/Dispatch.WPF;component/Resources/Data/Roster.csv", UriKind.Absolute);
-        var info = Application.GetResourceStream(uri);
-        using var streamReader = new StreamReader(info.Stream);
+        using var streamReader = new StreamReader(File.OpenRead("Resources/Data/Roster.csv"));
 
         AllUnits.CollectionChanged += (sender, args) => OnPropertyChanged(nameof(AvailableUnits));
         ActiveUnits.CollectionChanged += (sender, args) => OnPropertyChanged(nameof(AvailableUnits));
@@ -102,9 +114,7 @@ internal class MainWindowViewModel : INotifyPropertyChanged
         }
 
         // Load postals
-        var uriPostal = new Uri("pack://application:,,,/Dispatch.WPF;component/Resources/Data/Postals.csv", UriKind.Absolute);
-        var infoPostal = Application.GetResourceStream(uriPostal);
-        using var streamReaderPostal = new StreamReader(infoPostal.Stream);
+        using var streamReaderPostal = new StreamReader(File.OpenRead("Resources/Data/Postals.csv"));
 
         var allPostalString = streamReaderPostal.ReadToEnd().Split("\r\n");
         foreach (var postalString in allPostalString)
@@ -112,11 +122,20 @@ internal class MainWindowViewModel : INotifyPropertyChanged
             var postalStringSplit = postalString.Split(",");
             AllPostal.Add(new Postal(int.Parse(postalStringSplit[0]), new Point(int.Parse(postalStringSplit[1]), int.Parse(postalStringSplit[2]))));
         }
+
+        var localMapImage = new BitmapImage();
+        localMapImage.BeginInit();
+        localMapImage.StreamSource = File.OpenRead("Resources/Images/newMap.png");
+        localMapImage.DecodePixelWidth = 6144;
+        localMapImage.CacheOption = BitmapCacheOption.OnLoad;
+        localMapImage.EndInit();
+
+        MapImage = localMapImage;
     }
-    
+
     public ICommand ActivateUnitCommand => new Command<Unit>(param =>
     {
-        if(param == null) return;
+        if (param == null) return;
         param.CurrentPosition = AllPostal.First();
         param.CurrentState = AvailableStates.First(x => x.Name == "10-8");
         ActiveUnits.Add(param);
@@ -128,7 +147,7 @@ internal class MainWindowViewModel : INotifyPropertyChanged
             return;
 
         var unit = (Unit)menuItem.DataContext;
-        
+
         switch (menuItem.Header)
         {
             case "10-17":
@@ -179,7 +198,7 @@ internal class MainWindowViewModel : INotifyPropertyChanged
         if (SelectedScene != null)
         {
             ActiveScenes.Add(SelectedScene);
-            if(SelectedScene.PrimaryUnit != null)
+            if (SelectedScene.PrimaryUnit != null)
                 SetUnitDestination(SelectedScene.PrimaryUnit, SelectedScene.Location);
             foreach (var unit in SelectedScene.AdditionalUnits)
             {
@@ -193,14 +212,14 @@ internal class MainWindowViewModel : INotifyPropertyChanged
 
     public ICommand ResolveSceneCommand => new Command<Scene>(scene =>
     {
-        if(scene == null) return;
+        if (scene == null) return;
         scene.SceneEnd = DateTime.Now;
 
         var baseFolder = (Application.Current as App)?.ServiceProvider.GetRequiredService<IOptions<Helpers.Configuration>>().Value.ReportLocation ?? "";
 
-        File.AppendAllText( Path.Combine(baseFolder, $"dispatch-{DateTime.Now:yyyyMMdd}.txt"), scene.ToString());
+        File.AppendAllText(Path.Combine(baseFolder, $"dispatch-{DateTime.Now:yyyyMMdd}.txt"), scene.ToString());
 
-        if(scene.PrimaryUnit != null)
+        if (scene.PrimaryUnit != null)
             SetUnitState(scene.PrimaryUnit, AvailableStates.First(x => x.Name == "10-8"));
         foreach (var sceneAdditionalUnit in scene.AdditionalUnits)
         {
@@ -216,9 +235,9 @@ internal class MainWindowViewModel : INotifyPropertyChanged
 
         if (unit.Destination == unit.CurrentPosition && unit.CurrentState.Name == "10-17")
             SetUnitState(unit, AvailableStates.First(x => x.Name == "10-23"));
-        
+
         if (unit.Destination == unit.CurrentPosition) return;
-        
+
         SetUnitState(unit, AvailableStates.First(x => x.Name == "10-17"));
     }
 
@@ -241,12 +260,11 @@ internal class MainWindowViewModel : INotifyPropertyChanged
                 }
                 break;
         }
-        
+
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
-
-    [NotifyPropertyChangedInvocator]
+    
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

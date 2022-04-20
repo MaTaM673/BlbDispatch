@@ -4,11 +4,13 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace Dispatch.WPF.Helpers;
-class WeakEventManager
-{
-	readonly Dictionary<string, List<Subscription>> _eventHandlers = new Dictionary<string, List<Subscription>>();
 
-	public void AddEventHandler<TEventArgs>(EventHandler<TEventArgs> handler, [CallerMemberName] string eventName = null)
+/// <remarks>Took from the Xamarin source code</remarks>
+internal class WeakEventManager
+{
+    private readonly Dictionary<string, List<Subscription>> _eventHandlers = new();
+
+	public void AddEventHandler<TEventArgs>(EventHandler<TEventArgs> handler, [CallerMemberName] string? eventName = null)
 		where TEventArgs : EventArgs
 	{
 		if (string.IsNullOrEmpty(eventName))
@@ -20,7 +22,7 @@ class WeakEventManager
 		AddEventHandler(eventName, handler.Target, handler.GetMethodInfo());
 	}
 
-	public void AddEventHandler(EventHandler handler, [CallerMemberName] string eventName = null)
+	public void AddEventHandler(EventHandler? handler, [CallerMemberName] string? eventName = null)
 	{
 		if (string.IsNullOrEmpty(eventName))
 			throw new ArgumentNullException(nameof(eventName));
@@ -33,46 +35,43 @@ class WeakEventManager
 
 	public void HandleEvent(object sender, object args, string eventName)
 	{
-		var toRaise = new List<(object subscriber, MethodInfo handler)>();
+		var toRaise = new List<(object? subscriber, MethodInfo handler)>();
 		var toRemove = new List<Subscription>();
 
-		if (_eventHandlers.TryGetValue(eventName, out List<Subscription> target))
-		{
-			for (int i = 0; i < target.Count; i++)
-			{
-				Subscription subscription = target[i];
-				bool isStatic = subscription.Subscriber == null;
-				if (isStatic)
-				{
-					// For a static method, we'll just pass null as the first parameter of MethodInfo.Invoke
-					toRaise.Add((null, subscription.Handler));
-					continue;
-				}
+		if (_eventHandlers.TryGetValue(eventName, out var target))
+        {
+            foreach (var subscription in target)
+            {
+                var isStatic = subscription.Subscriber == null;
+                if (isStatic)
+                {
+                    // For a static method, we'll just pass null as the first parameter of MethodInfo.Invoke
+                    toRaise.Add((null, subscription.Handler));
+                    continue;
+                }
 
-				object subscriber = subscription.Subscriber.Target;
+                var subscriber = subscription.Subscriber?.Target;
 
-				if (subscriber == null)
-					// The subscriber was collected, so there's no need to keep this subscription around
-					toRemove.Add(subscription);
-				else
-					toRaise.Add((subscriber, subscription.Handler));
-			}
+                if (subscriber == null)
+                    // The subscriber was collected, so there's no need to keep this subscription around
+                    toRemove.Add(subscription);
+                else
+                    toRaise.Add((subscriber, subscription.Handler));
+            }
 
-			for (int i = 0; i < toRemove.Count; i++)
-			{
-				Subscription subscription = toRemove[i];
-				target.Remove(subscription);
-			}
-		}
+            foreach (var subscription in toRemove)
+            {
+                target.Remove(subscription);
+            }
+        }
 
-		for (int i = 0; i < toRaise.Count; i++)
-		{
-			(var subscriber, var handler) = toRaise[i];
-			handler.Invoke(subscriber, new[] { sender, args });
-		}
+		foreach (var (subscriber, handler) in toRaise)
+        {
+            handler.Invoke(subscriber, new[] { sender, args });
+        }
 	}
 
-	public void RemoveEventHandler<TEventArgs>(EventHandler<TEventArgs> handler, [CallerMemberName] string eventName = null)
+	public void RemoveEventHandler<TEventArgs>(EventHandler<TEventArgs> handler, [CallerMemberName] string? eventName = null)
 		where TEventArgs : EventArgs
 	{
 		if (string.IsNullOrEmpty(eventName))
@@ -84,7 +83,7 @@ class WeakEventManager
 		RemoveEventHandler(eventName, handler.Target, handler.GetMethodInfo());
 	}
 
-	public void RemoveEventHandler(EventHandler handler, [CallerMemberName] string eventName = null)
+	public void RemoveEventHandler(EventHandler? handler, [CallerMemberName] string? eventName = null)
 	{
 		if (string.IsNullOrEmpty(eventName))
 			throw new ArgumentNullException(nameof(eventName));
@@ -95,9 +94,9 @@ class WeakEventManager
 		RemoveEventHandler(eventName, handler.Target, handler.GetMethodInfo());
 	}
 
-	void AddEventHandler(string eventName, object? handlerTarget, MethodInfo methodInfo)
+    private void AddEventHandler(string eventName, object? handlerTarget, MethodInfo methodInfo)
 	{
-		if (!_eventHandlers.TryGetValue(eventName, out List<Subscription> targets))
+		if (!_eventHandlers.TryGetValue(eventName, out var targets))
 		{
 			targets = new List<Subscription>();
 			_eventHandlers.Add(eventName, targets);
@@ -113,14 +112,14 @@ class WeakEventManager
 		targets.Add(new Subscription(new WeakReference(handlerTarget), methodInfo));
 	}
 
-	void RemoveEventHandler(string eventName, object handlerTarget, MemberInfo methodInfo)
+    private void RemoveEventHandler(string eventName, object? handlerTarget, MemberInfo methodInfo)
 	{
-		if (!_eventHandlers.TryGetValue(eventName, out List<Subscription> subscriptions))
+		if (!_eventHandlers.TryGetValue(eventName, out var subscriptions))
 			return;
 
-		for (int n = subscriptions.Count; n > 0; n--)
+		for (var n = subscriptions.Count; n > 0; n--)
 		{
-			Subscription current = subscriptions[n - 1];
+			var current = subscriptions[n - 1];
 
 			if (current.Subscriber?.Target != handlerTarget || current.Handler.Name != methodInfo.Name)
 				continue;
@@ -130,15 +129,15 @@ class WeakEventManager
 		}
 	}
 
-	struct Subscription
+    private struct Subscription
 	{
-		public Subscription(WeakReference subscriber, MethodInfo handler)
+		public Subscription(WeakReference? subscriber, MethodInfo handler)
 		{
 			Subscriber = subscriber;
 			Handler = handler ?? throw new ArgumentNullException(nameof(handler));
 		}
 
-		public readonly WeakReference Subscriber;
+		public readonly WeakReference? Subscriber;
 		public readonly MethodInfo Handler;
 	}
 }

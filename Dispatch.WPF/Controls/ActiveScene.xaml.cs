@@ -1,11 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Dispatch.WPF.Models;
+using Dispatch.WPF.ViewModels;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
-using Dispatch.WPF.Models;
-using Dispatch.WPF.ViewModels;
 
 namespace Dispatch.WPF.Controls;
 /// <summary>

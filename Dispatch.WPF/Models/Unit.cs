@@ -1,9 +1,7 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using Dispatch.WPF.Annotations;
+﻿using Dispatch.WPF.Helpers;
 
 namespace Dispatch.WPF.Models;
-public class Unit : INotifyPropertyChanged
+public class Unit : ObservableObject
 {
     public string CallSign { get; set; }
     public string Name { get; set; }
@@ -13,24 +11,14 @@ public class Unit : INotifyPropertyChanged
     public State CurrentState
     {
         get => _currentState;
-        set
-        {
-            if (Equals(value, _currentState)) return;
-            _currentState = value;
-            OnPropertyChanged();
-        }
+        set => RaiseAndSetIfChanged(ref _currentState, value);
     }
 
     private Postal? _currentPosition;
     public Postal? CurrentPosition
     {
         get => _currentPosition;
-        set
-        {
-            if (Equals(value, _currentPosition)) return;
-            _currentPosition = value;
-            OnPropertyChanged();
-        }
+        set => RaiseAndSetIfChanged(ref _currentPosition, value);
     }
 
 
@@ -38,25 +26,12 @@ public class Unit : INotifyPropertyChanged
     public Postal? Destination
     {
         get => _destination;
-        set
-        {
-            if (Equals(value, _destination)) return;
-            _destination = value;
-            OnPropertyChanged();
-        }
+        set => RaiseAndSetIfChanged(ref _destination, value);
     }
 
     public Unit(string callSign, string name)
     {
         CallSign = callSign;
         Name = name;
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    [NotifyPropertyChangedInvocator]
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

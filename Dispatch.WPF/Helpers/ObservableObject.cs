@@ -15,12 +15,10 @@ public class ObservableObject : INotifyPropertyChanged
     {
         var handler = PropertyChanged;
 
-        if (handler != null)
-        {
-            var propertyName = GetPropertyName(propertyExpression);
-            if (!string.IsNullOrEmpty(propertyName))
-                RaisePropertyChanged(propertyName);
-        }
+        if (handler == null) return;
+        var propertyName = GetPropertyName(propertyExpression);
+        if (!string.IsNullOrEmpty(propertyName))
+            RaisePropertyChanged(propertyName);
     }
 
     protected static string GetPropertyName<T>(Expression<Func<T>> propertyExpression)
@@ -30,7 +28,7 @@ public class ObservableObject : INotifyPropertyChanged
             throw new ArgumentNullException(nameof(propertyExpression));
         }
 
-        if (!(propertyExpression.Body is MemberExpression body))
+        if (propertyExpression.Body is not MemberExpression body)
         {
             throw new ArgumentException("Invalid argument", nameof(propertyExpression));
         }

@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Windows.Input;
 
 namespace Dispatch.WPF.Helpers;
+/// <remarks>Taken from the Xamarin source code</remarks>
 public sealed class Command<T> : Command
 {
 	public Command(Action<T?> execute)

@@ -538,9 +538,9 @@
         </Menu>
 
         <!-- Map -->
-        <controls:ZoomBorder x:Name="zoomBorder" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Grid.RowSpan="3" ClipToBounds="True" Background="Black">
-            <Canvas x:Name="canvas" Width="6144" Height="9216">
-                <Image Source="/Resources/Images/newMap.png" Width="{Binding ActualWidth, ElementName=canvas, Mode=OneWay}" Height="{Binding ActualHeight, ElementName=canvas, Mode=OneWay}" />
+        <controls:ZoomBorder x:Name="ZoomBorder" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" ClipToBounds="True" Background="Black">
+            <Canvas x:Name="Canvas" Width="6144" Height="9216">
+                <Image Source="{Binding MapImage}" Width="6144" Height="9216" />
                 <!-- Current location -->
                 <ItemsControl ItemsSource="{Binding ActiveUnits}">
                     <ItemsControl.ItemsPanel>

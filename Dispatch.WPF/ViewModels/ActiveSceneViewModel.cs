@@ -1,5 +1,4 @@
-﻿using System;
-using Dispatch.WPF.Helpers;
+﻿using Dispatch.WPF.Helpers;
 using Dispatch.WPF.Models;
 using System.Collections.ObjectModel;
 using System.Linq;
