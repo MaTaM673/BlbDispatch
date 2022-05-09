@@ -33,7 +33,7 @@ jobs:
         echo ${{ env.RELEASE_VERSION }}
     
     - name: TestShouldNotRun
-      if: ${{ SHOULD_RELEASE == true }}
+      if: ${{ env.SHOULD_RELEASE == true }}
       run: |
         echo $env:RELEASE_VERSION
         echo ${{ env.RELEASE_VERSION }}
