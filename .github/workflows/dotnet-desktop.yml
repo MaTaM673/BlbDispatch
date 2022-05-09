@@ -30,13 +30,11 @@ jobs:
     - name: Test
       run: |
         echo $env:RELEASE_VERSION
-        echo ${{ env.RELEASE_VERSION }}
     
     - name: TestShouldNotRun
       if: ${{ env.SHOULD_RELEASE == true }}
       run: |
         echo $env:RELEASE_VERSION
-        echo ${{ env.RELEASE_VERSION }}
     
     - name: Checkout
       uses: actions/checkout@v3
