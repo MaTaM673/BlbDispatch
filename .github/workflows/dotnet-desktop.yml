@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
   push:
     branches: [ master ]
+    tags: 
+      - 'refs/heads/master/*'
   pull_request:
     branches: [ master ]
       
