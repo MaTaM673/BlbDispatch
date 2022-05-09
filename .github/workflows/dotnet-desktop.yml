@@ -23,14 +23,20 @@ jobs:
     - name: Set env
       run: | 
         $regexResult = $env:GITHUB_REF -match 'refs\/heads\/master\/(.*)'
-        echo "SHOULD_RELEASE=$regexResult"
-        echo "RELEASE_VERSION=$Matches.1" >> $env:GITHUB_ENV
+        echo "SHOULD_RELEASE=$regexResult" >> $env:GITHUB_ENV
+        $matchGroup = $Matches.1
+        echo "RELEASE_VERSION=$matchGroup" >> $env:GITHUB_ENV
       
     - name: Test
       run: |
         echo $env:RELEASE_VERSION
         echo ${{ env.RELEASE_VERSION }}
     
+    - name: TestShouldNotRun
+      if: ${{ $env:SHOULD_RELEASE == true }}
+      run: |
+        echo $env:RELEASE_VERSION
+        echo ${{ env.RELEASE_VERSION }}
     
     - name: Checkout
       uses: actions/checkout@v3
