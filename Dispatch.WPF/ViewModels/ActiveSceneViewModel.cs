@@ -26,7 +26,6 @@ internal class ActiveSceneViewModel : ObservableObject
     }
 
     private ObservableCollection<Postal> _postalList = new();
-
     public ObservableCollection<Postal> PostalList
     {
         get => _postalList;
@@ -39,7 +38,10 @@ internal class ActiveSceneViewModel : ObservableObject
         set
         {
             if (value != null && !CurrentScene.AdditionalUnits.Contains(value))
+            {
                 CurrentScene.AdditionalUnits.Add(value);
+                CurrentScene.AddDetails($"{value.FullName} added to scene");
+            }
 
             RaisePropertyChanged();
         }

@@ -671,7 +671,7 @@
                                                             <StackPanel Orientation="Horizontal">
                                                                 <TextBlock Text="Location" />
                                                                 <TextBox Width="50" Text="{Binding NewUnitPosition, Source={StaticResource ViewModel}}" />
-                                                                <Button Command="{Binding ChangeStatusCommand, Source={StaticResource ViewModel}}" CommandParameter="{Binding Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type MenuItem}}}" Content="&gt;"/>
+                                                                <Button Command="{Binding ChangeStatusCommand, Source={StaticResource ViewModel}}" CommandParameter="{Binding Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type MenuItem}, AncestorLevel=2}}" Content="&gt;"/>
                                                             </StackPanel>
                                                         </MenuItem.Header>
                                                     </MenuItem>

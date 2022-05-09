@@ -73,7 +73,6 @@ internal class MainWindowViewModel : INotifyPropertyChanged
     }
 
     private string? _newUnitPosition;
-
     public string? NewUnitPosition
     {
         get => _newUnitPosition;
@@ -84,7 +83,6 @@ internal class MainWindowViewModel : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
-
 
     private ImageSource? _mapImage;
     public ImageSource? MapImage
@@ -154,6 +152,7 @@ internal class MainWindowViewModel : INotifyPropertyChanged
                 unit.Destination = AllPostal.FirstOrDefault(x => x.Id.ToString() == NewUnitPosition);
                 NewUnitPosition = "";
                 break;
+
         }
 
         SetUnitState(unit, AvailableStates.First(x => x.Name == menuItem.Header.ToString()));
@@ -214,10 +213,12 @@ internal class MainWindowViewModel : INotifyPropertyChanged
     {
         if (scene == null) return;
         scene.SceneEnd = DateTime.Now;
-
+        scene.AddDetails("Scene code 4");
         var baseFolder = (Application.Current as App)?.ServiceProvider.GetRequiredService<IOptions<Helpers.Configuration>>().Value.ReportLocation ?? "";
 
         File.AppendAllText(Path.Combine(baseFolder, $"dispatch-{DateTime.Now:yyyyMMdd}.txt"), scene.ToString());
+
+        ActiveScenes.Remove(scene);
 
         if (scene.PrimaryUnit != null)
             SetUnitState(scene.PrimaryUnit, AvailableStates.First(x => x.Name == "10-8"));
@@ -225,8 +226,6 @@ internal class MainWindowViewModel : INotifyPropertyChanged
         {
             SetUnitState(sceneAdditionalUnit, AvailableStates.First(x => x.Name == "10-8"));
         }
-
-        ActiveScenes.Remove(scene);
     });
 
     private void SetUnitDestination(Unit unit, Postal? destination)
@@ -253,10 +252,22 @@ internal class MainWindowViewModel : INotifyPropertyChanged
             case "10-23" when unit.Destination != null && unit.Destination != unit.CurrentPosition:
                 unit.CurrentPosition = unit.Destination;
                 unit.Destination = null;
-
                 foreach (var scene in ActiveScenes.Where(x => x.PrimaryUnit == unit || x.AdditionalUnits.Contains(unit)))
                 {
                     scene.AddDetails($"{unit.FullName} arrived on scene");
+                }
+                break;
+            case "10-8":
+                foreach (var scene in ActiveScenes.Where(x => x.PrimaryUnit == unit || x.AdditionalUnits.Contains(unit)))
+                {
+                    scene.AddDetails($"{unit.FullName} cleared from scene");
+                }
+                break;
+            case "10-50":
+            case "Down":
+                foreach (var scene in ActiveScenes.Where(x => x.PrimaryUnit == unit || x.AdditionalUnits.Contains(unit)))
+                {
+                    scene.AddDetails($"{unit.FullName} {state.Name}");
                 }
                 break;
         }
