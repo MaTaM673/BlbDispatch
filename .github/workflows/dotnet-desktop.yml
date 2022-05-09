@@ -5,7 +5,7 @@ on:
   push:
     branches: [ master ]
     tags: 
-      - 'refs/heads/master/*'
+      - 'v.*'
   pull_request:
     branches: [ master ]
       
