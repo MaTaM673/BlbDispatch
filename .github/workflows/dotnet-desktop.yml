@@ -22,11 +22,9 @@ jobs:
     steps:    
     - name: Set env
       run: | 
-        echo "TEST"
-        echo "$env:GITHUB_REF"
-        echo $env:GITHUB_REF
-        echo "${$env:GITHUB_REF#refs/*/}"
-        echo "RELEASE_VERSION=${$env:GITHUB_REF#refs/*/}" >> $env:GITHUB_ENV
+        $regexResult = $env:GITHUB_REF -match 'refs\/heads\/master\/(.*)'
+        echo "SHOULD_RELEASE=$regexResult"
+        echo "RELEASE_VERSION=$Matches.1" >> $env:GITHUB_ENV
       
     - name: Test
       run: |
